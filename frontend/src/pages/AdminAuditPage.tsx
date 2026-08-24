@@ -74,14 +74,14 @@ export function AdminAuditPage() {
         {loading ? (
           <Table>
             <THead>
-              <Th>Requested at</Th>
-              <Th>Requester user id</Th>
-              <Th>Customer id</Th>
-              <Th>PAN hash</Th>
-              <Th>Purpose</Th>
-              <Th>Consent</Th>
-              <Th>Bureau provider</Th>
-              <Th>Status</Th>
+              <Th className="px-3">Requested at</Th>
+              <Th className="px-3">Requester</Th>
+              <Th className="px-3">Customer</Th>
+              <Th className="px-3">PAN hash</Th>
+              <Th className="px-3">Purpose</Th>
+              <Th className="px-3">Consent</Th>
+              <Th className="px-3">Bureau</Th>
+              <Th className="px-3">Status</Th>
             </THead>
             <TableSkeleton cols={8} />
           </Table>
@@ -97,30 +97,30 @@ export function AdminAuditPage() {
           <>
             <Table>
               <THead>
-                <Th>Requested at</Th>
-                <Th>Requester user id</Th>
-                <Th>Customer id</Th>
-                <Th>PAN hash</Th>
-                <Th>Purpose</Th>
-                <Th>Consent</Th>
-                <Th>Bureau provider</Th>
-                <Th>Status</Th>
+                <Th className="px-3">Requested at</Th>
+                <Th className="px-3">Requester</Th>
+                <Th className="px-3">Customer</Th>
+                <Th className="px-3">PAN hash</Th>
+                <Th className="px-3">Purpose</Th>
+                <Th className="px-3">Consent</Th>
+                <Th className="px-3">Bureau</Th>
+                <Th className="px-3">Status</Th>
               </THead>
               <TBody>
                 {page.content.map((row) => (
                   <Tr key={row.id}>
-                    <Td className="text-neutral-500">{new Date(row.requestedAt).toLocaleString()}</Td>
-                    <Td>{row.requesterUserId}</Td>
-                    <Td>{row.customerId ?? "-"}</Td>
-                    <Td>
+                    <Td className="px-3 text-neutral-500">{new Date(row.requestedAt).toLocaleString()}</Td>
+                    <Td className="px-3">{row.requesterUserId}</Td>
+                    <Td className="px-3">{row.customerId ?? "-"}</Td>
+                    <Td className="px-3">
                       <code title={row.panHash} className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-600">
-                        {row.panHash.slice(0, 12)}&hellip;
+                        {row.panHash.slice(0, 10)}&hellip;
                       </code>
                     </Td>
-                    <Td>{row.purpose ?? "-"}</Td>
-                    <Td>{row.consentConfirmed ? "Yes" : "No"}</Td>
-                    <Td>{row.bureauProvider ?? "-"}</Td>
-                    <Td>
+                    <Td className="px-3">{row.purpose ?? "-"}</Td>
+                    <Td className="px-3">{row.consentConfirmed ? "Yes" : "No"}</Td>
+                    <Td className="px-3">{row.bureauProvider ?? "-"}</Td>
+                    <Td className="px-3">
                       <StatusPill status={row.responseStatus} />
                     </Td>
                   </Tr>

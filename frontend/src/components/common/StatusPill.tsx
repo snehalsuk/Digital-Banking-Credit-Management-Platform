@@ -19,7 +19,7 @@ const STATUS_MAP: Record<string, StatusConfig> = {
   COMPLETED: { tone: "success" },
   PAID: { tone: "success" },
 
-  PENDING: { tone: "warning" },
+  PENDING: { tone: "neutral" },
   FROZEN: { tone: "warning" },
   OVERDUE: { tone: "warning", label: "Overdue" },
   CONSENT_DENIED: { tone: "warning", label: "Consent denied" },

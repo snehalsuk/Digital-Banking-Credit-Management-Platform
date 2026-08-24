@@ -80,11 +80,15 @@ export function DashboardPage() {
         );
         if (cancelled) return;
 
+        // Only count EMIs that are actually overdue (missed), not ones simply
+        // not yet due — this mirrors the credit-score lookup's definition of
+        // "pending EMIs" (backend's findOverdueByCustomerId), so the number
+        // shown here means the same thing everywhere in the app.
         let pendingEmiCount = 0;
         let pendingEmiAmount = 0;
         for (const schedule of schedules) {
           for (const emi of schedule) {
-            if (emi.status === "PENDING" || emi.status === "OVERDUE") {
+            if (emi.status === "OVERDUE" || emi.status === "DEFAULTED") {
               pendingEmiCount += 1;
               pendingEmiAmount += emi.emiAmount - emi.paidAmount;
             }
@@ -139,7 +143,7 @@ export function DashboardPage() {
             tone="success"
           />
           <StatCard
-            label="Pending EMIs"
+            label="Overdue EMIs"
             value={
               <span className="text-2xl font-bold text-neutral-900">
                 {summary?.pendingEmiCount ?? 0}
