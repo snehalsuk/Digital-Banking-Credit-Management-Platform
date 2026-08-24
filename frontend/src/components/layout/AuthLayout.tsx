@@ -9,7 +9,7 @@ export function AuthLayout({ title, description, children }: { title: string; de
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-600 text-white shadow-sm">
             <BankIcon size={22} />
           </div>
-          <span className="text-lg font-semibold tracking-tight text-neutral-900">Meridian Bank</span>
+          <span className="text-lg font-semibold tracking-tight text-neutral-900">Midnight Bank</span>
         </div>
         <div className="animate-fade-in rounded-2xl border border-neutral-200 bg-white p-7 shadow-[var(--shadow-card)] sm:p-8">
           <div className="mb-6">

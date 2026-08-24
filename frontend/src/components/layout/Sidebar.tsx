@@ -31,7 +31,7 @@ export function SidebarBrand() {
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white shadow-sm">
         <BankIcon size={19} />
       </div>
-      <span className="text-base font-semibold tracking-tight text-neutral-900">Meridian Bank</span>
+      <span className="text-base font-semibold tracking-tight text-neutral-900">Midnight Bank</span>
     </div>
   );
 }

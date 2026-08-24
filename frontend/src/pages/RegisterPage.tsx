@@ -30,7 +30,7 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthLayout title="Create your account" description="Open a Meridian Bank account in under a minute.">
+    <AuthLayout title="Create your account" description="Open a Midnight Bank account in under a minute.">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <Input
           label="Username"

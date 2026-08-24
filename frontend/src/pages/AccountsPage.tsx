@@ -99,7 +99,7 @@ export function AccountsPage() {
             <EmptyState
               icon={<WalletIcon size={22} />}
               title="You have no accounts yet"
-              description="Open your first account to start banking with Meridian."
+              description="Open your first account to start banking with Midnight Bank."
               action={
                 <Button size="sm" icon={<PlusIcon size={14} />} onClick={() => setShowForm(true)}>
                   Open account

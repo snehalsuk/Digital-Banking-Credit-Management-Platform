@@ -11,7 +11,7 @@ export function MobileNav() {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white">
           <BankIcon size={16} />
         </div>
-        <span className="text-sm font-semibold text-neutral-900">Meridian Bank</span>
+        <span className="text-sm font-semibold text-neutral-900">Midnight Bank</span>
       </div>
       <button
         type="button"
