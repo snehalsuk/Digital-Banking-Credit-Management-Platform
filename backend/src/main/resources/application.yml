@@ -25,10 +25,13 @@ server:
   # match the paths documented in docs/API.md exactly.
 
 springdoc:
+  # Paths carry the same manual /api prefix as our controllers (see the
+  # server.servlet note above) so they line up with the permitted paths in
+  # SecurityConfig.PUBLIC_ENDPOINTS.
   api-docs:
-    path: /v3/api-docs
+    path: /api/v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html
+    path: /api/swagger-ui.html
 
 security:
   jwt:
@@ -38,7 +41,7 @@ security:
     refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000} # 7 days
   crypto:
     # Base64-encoded 256-bit AES key used to encrypt PAN at rest (AES-256-GCM).
-    pan-key: ${PAN_ENCRYPTION_KEY:ZGV2LW9ubHktcGFuLWFlcy1rZXktMzItYnl0ZXMtbG9uZyEh}
+    pan-key: ${PAN_ENCRYPTION_KEY:ZGV2LXBhbi1hZXMyNTYta2V5LTMyLWJ5dGVzLW9rISE=}
     # Pepper used for the deterministic HMAC-SHA256 PAN hash (indexed lookup column).
     pan-pepper: ${PAN_HASH_PEPPER:dev-only-pan-hash-pepper-change-me}
 
