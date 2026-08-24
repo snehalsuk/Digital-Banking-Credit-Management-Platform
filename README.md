@@ -127,6 +127,10 @@ npx tsc -b && npm run build   # strict type-checks and production-builds the fro
 - [`docs/API.md`](docs/API.md) — endpoint reference
 - [`docs/EXTERNAL_APIS.md`](docs/EXTERNAL_APIS.md) — the real external APIs (credit bureaus, PAN verification, Aadhaar eKYC, Account Aggregator) needed to go live, and how to get access to each
 
+## Author
+
+Built and maintained by [**snehalsuk**](https://github.com/snehalsuk).
+
 ## License
 
-No license file is currently included — all rights reserved by default. Add a `LICENSE` file if you intend to open this repository up for reuse.
+Licensed under the [MIT License](LICENSE).
