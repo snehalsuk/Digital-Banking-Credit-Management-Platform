@@ -1,0 +1,47 @@
+# Production profile: every value is sourced from an environment variable.
+# There are NO defaults here (unlike application-dev.yml) — the process will
+# fail fast at startup if a required secret is missing, which is intentional.
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=true&serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: false
+
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
+    refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+  crypto:
+    pan-key: ${PAN_ENCRYPTION_KEY}
+    pan-pepper: ${PAN_HASH_PEPPER}
+
+# --- Credit bureau integration (production) ---
+# These are intentionally blank placeholders. This codebase ships with a
+# MockCreditBureauClient only (see creditscore.bureau package, added in a
+# later phase). Wiring a REAL bureau (CIBIL / Experian / Equifax / CRIF)
+# requires the business to independently obtain a licensing/API agreement
+# with that bureau. Once such an agreement and credentials exist:
+#   1. Set bureau.provider=real
+#   2. Populate bureau.base-url / bureau.client-id / bureau.client-secret
+#      via the environment variables below
+#   3. Implement/enable the corresponding CreditBureauClient (the
+#      RealCreditBureauClientStub documents the exact contract expected)
+# See docs/COMPLIANCE_BOUNDARIES.md for the full explanation.
+bureau:
+  provider: ${BUREAU_PROVIDER:mock}   # "mock" (default) or "real"
+  base-url: ${BUREAU_BASE_URL:}
+  client-id: ${BUREAU_CLIENT_ID:}
+  client-secret: ${BUREAU_CLIENT_SECRET:}
+
+logging:
+  level:
+    com.bankapp: INFO

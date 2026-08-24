@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: banking-application
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: ${SERVER_PORT:8080}
+  # NOTE: no servlet context-path is set here; controllers explicitly prefix
+  # their mappings with /api (e.g. @RequestMapping("/api/auth")) so routes
+  # match the paths documented in docs/API.md exactly.
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+security:
+  jwt:
+    # Base64-encoded, min 256-bit signing secret for HS256 signed access/refresh tokens.
+    secret: ${JWT_SECRET:ZGV2LW9ubHktand0LXNlY3JldC1kby1ub3QtdXNlLWluLXByb2QtMDEyMzQ1Njc4OQ==}
+    access-token-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}       # 15 minutes
+    refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000} # 7 days
+  crypto:
+    # Base64-encoded 256-bit AES key used to encrypt PAN at rest (AES-256-GCM).
+    pan-key: ${PAN_ENCRYPTION_KEY:ZGV2LW9ubHktcGFuLWFlcy1rZXktMzItYnl0ZXMtbG9uZyEh}
+    # Pepper used for the deterministic HMAC-SHA256 PAN hash (indexed lookup column).
+    pan-pepper: ${PAN_HASH_PEPPER:dev-only-pan-hash-pepper-change-me}
+
+# Credit bureau integration switch (implemented in a later build phase).
+# Defaults to the mock client; see docs/COMPLIANCE_BOUNDARIES.md.
+bureau:
+  provider: ${BUREAU_PROVIDER:mock}
+  base-url: ${BUREAU_BASE_URL:}
+  client-id: ${BUREAU_CLIENT_ID:}
+  client-secret: ${BUREAU_CLIENT_SECRET:}
+
+logging:
+  level:
+    com.bankapp: INFO
