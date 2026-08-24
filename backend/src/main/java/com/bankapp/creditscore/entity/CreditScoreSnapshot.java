@@ -31,7 +31,7 @@ public class CreditScoreSnapshot {
     private Long customerId;
 
     /** Same deterministic PAN hash used for lookup elsewhere; kept here for audit/history queries. */
-    @Column(name = "pan_hash", nullable = false, length = 64)
+    @Column(name = "pan_hash", nullable = false, length = 64, columnDefinition = "CHAR(64)")
     private String panHash;
 
     @Enumerated(EnumType.STRING)
@@ -46,7 +46,7 @@ public class CreditScoreSnapshot {
 
     /** Serialized (Jackson) JSON of the raw bureau response, for traceability of what fed this score. */
     @Lob
-    @Column(name = "raw_response_json")
+    @Column(name = "raw_response_json", columnDefinition = "LONGTEXT")
     private String rawResponseJson;
 
     @Column(name = "fetched_at", nullable = false, updatable = false)

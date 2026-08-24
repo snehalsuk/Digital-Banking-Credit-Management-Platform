@@ -35,7 +35,7 @@ public class BureauLookupAudit {
     @Column(name = "customer_id")
     private Long customerId;
 
-    @Column(name = "pan_hash", nullable = false, length = 64)
+    @Column(name = "pan_hash", nullable = false, length = 64, columnDefinition = "CHAR(64)")
     private String panHash;
 
     @Column(name = "purpose", length = 128)

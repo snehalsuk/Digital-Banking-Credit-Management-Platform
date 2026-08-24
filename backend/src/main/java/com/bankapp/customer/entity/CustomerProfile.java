@@ -39,7 +39,7 @@ public class CustomerProfile {
     private String panEncrypted;
 
     /** Deterministic HMAC-SHA256 hash of the PAN, used for indexed lookup since pan_encrypted is not searchable. */
-    @Column(name = "pan_hash", nullable = false, unique = true, length = 64)
+    @Column(name = "pan_hash", nullable = false, unique = true, length = 64, columnDefinition = "CHAR(64)")
     private String panHash;
 
     @Column(name = "address_line1", length = 255)
