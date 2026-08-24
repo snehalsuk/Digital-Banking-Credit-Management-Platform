@@ -1,24 +1,46 @@
-# Banking Application
+# Midnight Bank
 
-A full-stack banking application: React (Vite + TypeScript) frontend, Java 17 / Spring Boot 3.x backend, MySQL 8 database with Flyway migrations. Core feature (built in a later phase): PAN-based (India tax ID) credit score and pending-EMI lookup, combining the bank's own repayment history with a swappable, mock-by-default credit bureau client.
+**A full-stack digital banking & credit management platform** — accounts, transactions, loans/EMI tracking, and a PAN-based credit score lookup that surfaces pending/overdue EMIs — built with React, Spring Boot, and MySQL.
 
-> **Before you evaluate this for production or real customer data, read [`docs/COMPLIANCE_BOUNDARIES.md`](docs/COMPLIANCE_BOUNDARIES.md).** Credit bureau data is 100% simulated by default, and this codebase does not constitute a banking license, NBFC registration, or formal RBI/DPDP Act compliance certification.
+![Java](https://img.shields.io/badge/Java-17-red?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?logo=springboot&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)
 
-## Stack
+> **Before evaluating this for production or real customer data, read [`docs/COMPLIANCE_BOUNDARIES.md`](docs/COMPLIANCE_BOUNDARIES.md).** Credit bureau data is 100% simulated by default, and this codebase does not constitute a banking license, NBFC registration, or formal RBI/DPDP Act compliance certification — see [`docs/EXTERNAL_APIS.md`](docs/EXTERNAL_APIS.md) for exactly what real integrations (CIBIL, Experian, CRIF, Equifax, PAN verification, Aadhaar eKYC) would be needed to go live.
 
-- **Frontend**: React + TypeScript, built with Vite
-- **Backend**: Java 17, Spring Boot 3.x, Maven
-- **Database**: MySQL 8, schema managed by Flyway
-- **Auth**: JWT (access + refresh tokens), BCrypt, role-based access control
+## Screenshots
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/login.png" alt="Login page" /></td>
+<td width="50%"><img src="docs/screenshots/dashboard.png" alt="Dashboard" /></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/loan-emi-schedule.png" alt="Loan EMI schedule" /></td>
+<td width="50%"><img src="docs/screenshots/credit-score.png" alt="Credit score lookup" /></td>
+</tr>
+</table>
+
+## Features
+
+- **Auth & KYC** — JWT (access + refresh), BCrypt, role-based access (`CUSTOMER` / `LOAN_OFFICER` / `ADMIN`), KYC profile with PAN encrypted at rest (AES-256-GCM) and masked everywhere except to its owner.
+- **Accounts & transactions** — open accounts, deposit/withdraw/transfer with pessimistic-lock concurrency safety (no lost updates under concurrent transfers), paginated transaction history.
+- **Loans & EMI** — loan application → approval → disbursement, reducing-balance amortization schedule (principal components sum exactly to the loan amount, no rounding drift), EMI payments, a scheduled job that marks installments overdue → defaulted.
+- **Credit score & pending-EMI lookup by PAN** — the core feature: given a PAN, returns a bureau score (mock by default, swappable for a real bureau) combined with an internal score computed from the bank's own repayment history, plus every pending/overdue EMI. Every lookup requires explicit consent and is audited unconditionally — success, not-found, forbidden, or consent-denied.
+- **Admin audit trail** — every PAN-based bureau lookup logged and viewable by admins, filterable, never exposing a raw PAN.
+- **Modern UI** — Tailwind v4 design system, responsive sidebar shell, accessible components, dark-on-light "neobank" aesthetic.
 
 ## Repo layout
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full module breakdown.
 
 ```
-banking-application/
-├── docker-compose.yml   # MySQL 8 for local dev
-├── docs/                # Architecture, security, compliance, API docs
+.
+├── docker-compose.yml   # MySQL 8, backend, and frontend for a full containerized run
+├── docs/                # Architecture, security, compliance, API, and external-API docs
 ├── backend/              # Spring Boot backend (Maven)
 └── frontend/             # Vite + React + TypeScript frontend
 ```
@@ -94,7 +116,7 @@ mvn verify    # also runs Testcontainers-backed integration tests (*IT.java) aga
 
 ```bash
 cd frontend
-npx tsc -b && npm run build   # type-checks and production-builds the frontend
+npx tsc -b && npm run build   # strict type-checks and production-builds the frontend
 ```
 
 ## Documentation
@@ -102,18 +124,9 @@ npx tsc -b && npm run build   # type-checks and production-builds the frontend
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — module design, repo layout, data model
 - [`docs/SECURITY.md`](docs/SECURITY.md) — JWT, PAN encryption/masking, consent, rate limiting, RBAC
 - [`docs/COMPLIANCE_BOUNDARIES.md`](docs/COMPLIANCE_BOUNDARIES.md) — **read this first** — what's real vs. simulated/mocked, and what this codebase does not certify
-- [`docs/API.md`](docs/API.md) — endpoint reference, updated as modules are built
+- [`docs/API.md`](docs/API.md) — endpoint reference
+- [`docs/EXTERNAL_APIS.md`](docs/EXTERNAL_APIS.md) — the real external APIs (credit bureaus, PAN verification, Aadhaar eKYC, Account Aggregator) needed to go live, and how to get access to each
 
-## Build status
+## License
 
-All planned phases are complete:
-
-1. **Scaffolding** — repo structure, Docker Compose (MySQL), backend/frontend skeletons, docs.
-2. **Auth + Customer/KYC** — registration/login/refresh, JWT, PAN encryption at rest, KYC profile workflow.
-3. **Accounts + Transactions** — account opening, deposit/withdraw/transfer with pessimistic-lock concurrency safety, transaction history.
-4. **Loans + EMI** — loan application/approval/disbursement, reducing-balance amortization schedule, EMI payments, scheduled overdue-marking job.
-5. **Credit score** — internal repayment-history scoring, mock credit bureau client, combined score + pending-EMI lookup by PAN, unconditional audit logging.
-6. **Admin/audit views** — admin-only paginated audit trail UI/API, RBAC pass across all controllers.
-7. **Tests + full stack** — unit + Testcontainers integration tests, Dockerfiles for backend/frontend, full `docker-compose` stack.
-
-See `docs/API.md` for the complete endpoint reference.
+No license file is currently included — all rights reserved by default. Add a `LICENSE` file if you intend to open this repository up for reuse.
