@@ -6,6 +6,11 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { AccountsPage } from "./pages/AccountsPage";
+import { AccountDetailPage } from "./pages/AccountDetailPage";
+import { TransactionsPage } from "./pages/TransactionsPage";
+import { LoansPage } from "./pages/LoansPage";
+import { LoanDetailPage } from "./pages/LoanDetailPage";
 import "./App.css";
 
 function HomeRedirect() {
@@ -35,6 +40,46 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/accounts"
+            element={
+              <ProtectedRoute>
+                <AccountsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/accounts/:id"
+            element={
+              <ProtectedRoute>
+                <AccountDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/accounts/:id/transactions"
+            element={
+              <ProtectedRoute>
+                <TransactionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/loans"
+            element={
+              <ProtectedRoute>
+                <LoansPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/loans/:id"
+            element={
+              <ProtectedRoute>
+                <LoanDetailPage />
               </ProtectedRoute>
             }
           />

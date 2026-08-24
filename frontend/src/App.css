@@ -25,6 +25,10 @@
   padding: 2rem 1rem;
 }
 
+.app-main:has(.accounts-page, .account-detail-page, .transactions-page, .loans-page, .loan-detail-page) {
+  max-width: 960px;
+}
+
 .auth-page form,
 .profile-page form {
   display: flex;
@@ -72,4 +76,112 @@
 small {
   color: #888;
   font-size: 0.75rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid #333;
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.85rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.inline-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.inline-form input,
+.inline-form select {
+  padding: 0.45rem;
+  font-size: 0.95rem;
+}
+
+.inline-form button {
+  padding: 0.55rem 1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  height: fit-content;
+}
+
+.balance-display {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.tab-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tab-row button {
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  border: 1px solid #444;
+  background: transparent;
+  color: inherit;
+  border-radius: 4px;
+}
+
+.tab-row button.active {
+  background: #2a5;
+  border-color: #2a5;
+  color: #fff;
+}
+
+.pagination-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.status-active,
+.status-paid,
+.status-closed {
+  background: #2a2;
+}
+
+.status-frozen,
+.status-pending {
+  background: #b8860b;
+}
+
+.emi-status-pending {
+  background: #777;
+}
+
+.status-overdue,
+.emi-status-overdue {
+  background: #d68f00;
+}
+
+.status-defaulted,
+.emi-status-defaulted {
+  background: #d33;
 }
