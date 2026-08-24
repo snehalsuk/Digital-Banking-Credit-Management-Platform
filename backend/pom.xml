@@ -154,6 +154,34 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <!--
+              Surefire (bound to `mvn test`) runs only fast unit tests (*Test.java) and explicitly
+              excludes Testcontainers-backed integration tests (*IT.java), which require Docker
+              and are comparatively slow. Failsafe (bound to `mvn verify`) runs the *IT.java
+              classes instead, in the integration-test/verify phases. This means `mvn test` never
+              needs Docker; `mvn verify` does.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

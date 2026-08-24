@@ -25,7 +25,7 @@
   padding: 2rem 1rem;
 }
 
-.app-main:has(.accounts-page, .account-detail-page, .transactions-page, .loans-page, .loan-detail-page, .credit-score-page) {
+.app-main:has(.accounts-page, .account-detail-page, .transactions-page, .loans-page, .loan-detail-page, .credit-score-page, .admin-audit-page) {
   max-width: 960px;
 }
 
@@ -184,6 +184,31 @@ small {
 .status-defaulted,
 .emi-status-defaulted {
   background: #d33;
+}
+
+.audit-status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.audit-status-success {
+  background: #2a8f2a;
+}
+
+.audit-status-not_found {
+  background: #777;
+}
+
+.audit-status-forbidden {
+  background: #d33;
+}
+
+.audit-status-consent_denied {
+  background: #b8860b;
 }
 
 .mock-bureau-banner {

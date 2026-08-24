@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
+import { RoleGuard } from "./auth/RoleGuard";
 import { NavBar } from "./components/layout/NavBar";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -12,6 +13,7 @@ import { TransactionsPage } from "./pages/TransactionsPage";
 import { LoansPage } from "./pages/LoansPage";
 import { LoanDetailPage } from "./pages/LoanDetailPage";
 import { CreditScorePage } from "./pages/CreditScorePage";
+import { AdminAuditPage } from "./pages/AdminAuditPage";
 import "./App.css";
 
 function HomeRedirect() {
@@ -89,6 +91,16 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <CreditScorePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/audit"
+            element={
+              <ProtectedRoute>
+                <RoleGuard allowedRoles={["ADMIN"]}>
+                  <AdminAuditPage />
+                </RoleGuard>
               </ProtectedRoute>
             }
           />

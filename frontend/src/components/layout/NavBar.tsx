@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 
 export function NavBar() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -23,6 +23,7 @@ export function NavBar() {
             <Link to="/loans">Loans</Link>
             <Link to="/credit-score">Credit Score</Link>
             <Link to="/profile">Profile</Link>
+            {user?.role === "ADMIN" && <Link to="/admin/audit">Audit</Link>}
             <button type="button" onClick={handleLogout}>
               Log out
             </button>

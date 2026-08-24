@@ -16,6 +16,50 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bankapp-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: bankapp
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-devRootPass123}
+      JWT_SECRET: ${JWT_SECRET:-ZGV2LW9ubHktand0LXNlY3JldC1kby1ub3QtdXNlLWluLXByb2QtMDEyMzQ1Njc4OQ==}
+      JWT_ACCESS_EXPIRATION_MS: ${JWT_ACCESS_EXPIRATION_MS:-900000}
+      JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS:-604800000}
+      PAN_ENCRYPTION_KEY: ${PAN_ENCRYPTION_KEY:-ZGV2LXBhbi1hZXMyNTYta2V5LTMyLWJ5dGVzLW9rISE=}
+      PAN_HASH_PEPPER: ${PAN_HASH_PEPPER:-dev-only-pan-hash-pepper-change-me}
+      BUREAU_PROVIDER: ${BUREAU_PROVIDER:-mock}
+      BUREAU_BASE_URL: ${BUREAU_BASE_URL:-}
+      BUREAU_CLIENT_ID: ${BUREAU_CLIENT_ID:-}
+      BUREAU_CLIENT_SECRET: ${BUREAU_CLIENT_SECRET:-}
+      BUREAU_MEMBER_ID: ${BUREAU_MEMBER_ID:-}
+      BUREAU_TIMEOUT_MS: ${BUREAU_TIMEOUT_MS:-5000}
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    container_name: bankapp-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
 volumes:
   bankapp-mysql-data:
     driver: local

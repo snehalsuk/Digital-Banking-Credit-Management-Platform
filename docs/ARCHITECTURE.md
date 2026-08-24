@@ -34,11 +34,11 @@ banking-application/
 - **common** — cross-cutting infrastructure: Spring Security configuration, JWT issuing/validation, AES-256-GCM PAN encryption (`PanAttributeConverter`), deterministic PAN hashing for lookups (`PanHasher`), global exception handling, PAN/account-number masking utilities.
 - **auth** — user accounts, roles (`CUSTOMER`, `LOAN_OFFICER`, `ADMIN`), registration/login/refresh issuing JWT access + refresh token pairs.
 - **customer** — customer KYC profile: encrypted PAN at rest, hashed PAN for indexed lookup, consent capture, KYC status workflow (`PENDING` → `VERIFIED`/`REJECTED`).
-- **account** *(scaffolded, not yet implemented)* — bank accounts and balances.
-- **transaction** *(scaffolded, not yet implemented)* — ledger-style deposit/withdraw/transfer with row-level locking to prevent race conditions.
-- **loan** *(scaffolded, not yet implemented)* — loan origination, reducing-balance EMI amortization, a scheduled job marking overdue installments.
-- **creditscore** *(scaffolded, not yet implemented)* — internal scoring from the bank's own repayment history, combined with a swappable credit bureau client (mock by default; see `docs/COMPLIANCE_BOUNDARIES.md`).
-- **audit** *(scaffolded, not yet implemented)* — immutable audit log of every PAN-based bureau lookup (success, failure, or consent-denied), queryable by admins.
+- **account** — bank accounts and balances.
+- **transaction** — ledger-style deposit/withdraw/transfer with pessimistic row-level locking to prevent race conditions (proven under concurrency by `TransactionServiceIT`).
+- **loan** — loan origination, reducing-balance EMI amortization (`EmiCalculator`), a scheduled job marking overdue installments.
+- **creditscore** — internal scoring from the bank's own repayment history, combined with a swappable credit bureau client (mock by default; see `docs/COMPLIANCE_BOUNDARIES.md`).
+- **audit** — immutable audit log of every PAN-based bureau lookup (success, failure, or consent-denied), queryable by admins via `AdminAuditController`.
 
 ## Data model
 
@@ -46,7 +46,10 @@ Each module owns its own Flyway migration(s):
 
 - `V1__init_users_and_roles.sql` — `users`
 - `V2__customer_profile.sql` — `customer_profile` (PAN encrypted + hashed, KYC status, consent)
-- `V3__accounts.sql`, `V4__transactions.sql`, `V5__loans_and_emi.sql`, `V6__credit_score.sql` — added in later phases
+- `V3__accounts.sql` — `accounts`
+- `V4__transactions.sql` — `transactions` (ledger)
+- `V5__loans_and_emi.sql` — `loans`, `emi_schedule`
+- `V6__credit_score.sql` — `credit_score_snapshot`, `bureau_lookup_audit`
 
 PAN is never stored or logged in plaintext. Only the deterministic `pan_hash` column is ever used in `WHERE` clauses; the `pan_encrypted` column is AES-256-GCM ciphertext, decrypted only when returning data to its owner or an authorized officer/admin.
 
@@ -60,4 +63,10 @@ Vite + React + TypeScript SPA. `api/apiClient.ts` wraps Axios with a JWT request
 
 ## Build phases
 
-This codebase is being built in phases; phases 1 (scaffolding) and 2 (auth + customer/KYC) are complete. Accounts, transactions, loans, credit score, and admin/audit UI follow in later phases on top of this foundation — their package skeletons already exist under `backend/src/main/java/com/bankapp/`.
+All 7 planned phases are complete: scaffolding; auth + customer/KYC; accounts + transactions; loans + EMI; credit score; admin/audit views; tests + full Docker stack. See the root `README.md` "Build status" section and `docs/API.md` for the full endpoint reference.
+
+## Testing
+
+- **Unit tests** (`backend/src/test/java/...`, run by `mvn test`, no Docker needed): `EmiCalculatorTest` (amortization correctness), `InternalScoringServiceTest` (score clamping/formula, Mockito), `MaskingUtilTest`, `PanAttributeConverterTest` (encrypt/decrypt round-trip, random IV, deterministic hash).
+- **Integration tests** (`*IT.java`, run by `mvn verify` via maven-failsafe-plugin, require Docker): `AuthControllerIT` (register→login→refresh against a real MySQL Testcontainers instance with real Flyway migrations), `TransactionServiceIT` (concurrent withdrawals/transfers proving the pessimistic-lock scheme has no lost updates), `CreditScoreControllerIT` (full lookup flow — success, consent-denied, PAN-not-found — each asserted to write the correct `bureau_lookup_audit` row).
+- `AbstractIntegrationTest` (`backend/src/test/java/com/bankapp/`) is the shared Testcontainers MySQL base every `*IT` class extends, via `@DynamicPropertySource`.
