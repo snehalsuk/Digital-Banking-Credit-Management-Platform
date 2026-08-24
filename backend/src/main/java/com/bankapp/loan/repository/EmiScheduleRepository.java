@@ -31,4 +31,13 @@ public interface EmiScheduleRepository extends JpaRepository<EmiSchedule, Long> 
             + "AND e.status IN (com.bankapp.loan.entity.EmiStatus.OVERDUE, com.bankapp.loan.entity.EmiStatus.DEFAULTED) "
             + "ORDER BY e.dueDate ASC")
     List<EmiSchedule> findOverdueByCustomerId(@Param("customerId") Long customerId);
+
+    /**
+     * Every installment (any status) across all of a given customer's loans. Used by
+     * {@code InternalScoringService} to compute the internal repayment-history score, which needs
+     * the full history rather than just the currently-overdue subset.
+     */
+    @Query("SELECT e FROM EmiSchedule e WHERE e.loanId IN "
+            + "(SELECT l.id FROM Loan l WHERE l.customerId = :customerId)")
+    List<EmiSchedule> findAllByCustomerId(@Param("customerId") Long customerId);
 }

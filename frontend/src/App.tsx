@@ -11,6 +11,7 @@ import { AccountDetailPage } from "./pages/AccountDetailPage";
 import { TransactionsPage } from "./pages/TransactionsPage";
 import { LoansPage } from "./pages/LoansPage";
 import { LoanDetailPage } from "./pages/LoanDetailPage";
+import { CreditScorePage } from "./pages/CreditScorePage";
 import "./App.css";
 
 function HomeRedirect() {
@@ -80,6 +81,14 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <LoanDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/credit-score"
+            element={
+              <ProtectedRoute>
+                <CreditScorePage />
               </ProtectedRoute>
             }
           />

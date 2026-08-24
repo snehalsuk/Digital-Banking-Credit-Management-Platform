@@ -41,6 +41,8 @@ bureau:
   base-url: ${BUREAU_BASE_URL:}
   client-id: ${BUREAU_CLIENT_ID:}
   client-secret: ${BUREAU_CLIENT_SECRET:}
+  member-id: ${BUREAU_MEMBER_ID:}
+  timeout-ms: ${BUREAU_TIMEOUT_MS:5000}
 
 logging:
   level:

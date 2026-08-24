@@ -21,6 +21,7 @@ export function NavBar() {
             <Link to="/dashboard">Dashboard</Link>
             <Link to="/accounts">Accounts</Link>
             <Link to="/loans">Loans</Link>
+            <Link to="/credit-score">Credit Score</Link>
             <Link to="/profile">Profile</Link>
             <button type="button" onClick={handleLogout}>
               Log out
