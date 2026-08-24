@@ -2,18 +2,14 @@ import { useEffect, useState, type FormEvent } from "react";
 import * as adminAuditApi from "../api/adminAuditApi";
 import type { PageResponse } from "../types/transaction";
 import type { BureauLookupAudit } from "../types/audit";
-
-const STATUS_LABEL: Record<string, string> = {
-  SUCCESS: "Success",
-  NOT_FOUND: "Not found",
-  FORBIDDEN: "Forbidden",
-  CONSENT_DENIED: "Consent denied",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const className = `audit-status-badge audit-status-${status.toLowerCase()}`;
-  return <span className={className}>{STATUS_LABEL[status] ?? status}</span>;
-}
+import { PageHeader } from "../components/common/PageHeader";
+import { Card } from "../components/common/Card";
+import { Button } from "../components/common/Button";
+import { Input } from "../components/common/FormField";
+import { StatusPill } from "../components/common/StatusPill";
+import { EmptyState } from "../components/common/EmptyState";
+import { Table, THead, Th, TBody, Tr, Td, TableSkeleton } from "../components/common/Table";
+import { AlertIcon, ChevronIcon, ShieldIcon } from "../components/common/Icon";
 
 export function AdminAuditPage() {
   const [page, setPage] = useState<PageResponse<BureauLookupAudit> | null>(null);
@@ -46,85 +42,113 @@ export function AdminAuditPage() {
   }
 
   return (
-    <div className="admin-audit-page">
-      <h1>Bureau Lookup Audit Trail</h1>
-      <p>
-        Every PAN-based credit bureau lookup attempt — successful, forbidden, consent-denied, or
-        not-found — is logged here unconditionally. PANs are never shown; only the deterministic
-        hash used for internal lookups.
-      </p>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Bureau Lookup Audit Trail"
+        description="Every PAN-based credit bureau lookup attempt — successful, forbidden, consent-denied, or not-found — is logged here unconditionally. PANs are never shown; only the deterministic hash used for internal lookups."
+      />
 
-      <form onSubmit={handleFilterSubmit} className="inline-form">
-        <label>
-          PAN hash
-          <input
+      <Card>
+        <form onSubmit={handleFilterSubmit} className="flex flex-col items-end gap-4 sm:flex-row">
+          <Input
+            label="PAN hash"
             value={panHashFilter}
             onChange={(e) => setPanHashFilter(e.target.value)}
             placeholder="Filter by exact pan_hash"
+            wrapperClassName="w-full sm:max-w-sm"
           />
-        </label>
-        <button type="submit">Filter</button>
-        {appliedPanHash && (
-          <button type="button" onClick={handleClearFilter}>
-            Clear
-          </button>
-        )}
-      </form>
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p className="form-error">{error}</p>
-      ) : !page || page.content.length === 0 ? (
-        <p>No audit rows found.</p>
-      ) : (
-        <>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Requested at</th>
-                <th>Requester user id</th>
-                <th>Customer id</th>
-                <th>PAN hash</th>
-                <th>Purpose</th>
-                <th>Consent</th>
-                <th>Bureau provider</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {page.content.map((row) => (
-                <tr key={row.id}>
-                  <td>{new Date(row.requestedAt).toLocaleString()}</td>
-                  <td>{row.requesterUserId}</td>
-                  <td>{row.customerId ?? "-"}</td>
-                  <td>
-                    <code title={row.panHash}>{row.panHash.slice(0, 12)}&hellip;</code>
-                  </td>
-                  <td>{row.purpose ?? "-"}</td>
-                  <td>{row.consentConfirmed ? "Yes" : "No"}</td>
-                  <td>{row.bureauProvider ?? "-"}</td>
-                  <td>
-                    <StatusBadge status={row.responseStatus} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="pagination-row">
-            <button type="button" disabled={page.first} onClick={() => setPageNumber((p) => Math.max(0, p - 1))}>
-              Previous
-            </button>
-            <span>
-              Page {page.number + 1} of {Math.max(page.totalPages, 1)} ({page.totalElements} total)
-            </span>
-            <button type="button" disabled={page.last} onClick={() => setPageNumber((p) => p + 1)}>
-              Next
-            </button>
+          <div className="flex gap-2">
+            <Button type="submit" variant="secondary">
+              Filter
+            </Button>
+            {appliedPanHash && (
+              <Button type="button" variant="ghost" onClick={handleClearFilter}>
+                Clear
+              </Button>
+            )}
           </div>
-        </>
-      )}
+        </form>
+      </Card>
+
+      <Card padded={false}>
+        {loading ? (
+          <Table>
+            <THead>
+              <Th>Requested at</Th>
+              <Th>Requester user id</Th>
+              <Th>Customer id</Th>
+              <Th>PAN hash</Th>
+              <Th>Purpose</Th>
+              <Th>Consent</Th>
+              <Th>Bureau provider</Th>
+              <Th>Status</Th>
+            </THead>
+            <TableSkeleton cols={8} />
+          </Table>
+        ) : error ? (
+          <div className="p-6">
+            <EmptyState icon={<AlertIcon size={22} />} title="Could not load the audit trail" description={error} />
+          </div>
+        ) : !page || page.content.length === 0 ? (
+          <div className="p-6">
+            <EmptyState icon={<ShieldIcon size={22} />} title="No audit rows found" description="Try adjusting or clearing the PAN hash filter." />
+          </div>
+        ) : (
+          <>
+            <Table>
+              <THead>
+                <Th>Requested at</Th>
+                <Th>Requester user id</Th>
+                <Th>Customer id</Th>
+                <Th>PAN hash</Th>
+                <Th>Purpose</Th>
+                <Th>Consent</Th>
+                <Th>Bureau provider</Th>
+                <Th>Status</Th>
+              </THead>
+              <TBody>
+                {page.content.map((row) => (
+                  <Tr key={row.id}>
+                    <Td className="text-neutral-500">{new Date(row.requestedAt).toLocaleString()}</Td>
+                    <Td>{row.requesterUserId}</Td>
+                    <Td>{row.customerId ?? "-"}</Td>
+                    <Td>
+                      <code title={row.panHash} className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs text-neutral-600">
+                        {row.panHash.slice(0, 12)}&hellip;
+                      </code>
+                    </Td>
+                    <Td>{row.purpose ?? "-"}</Td>
+                    <Td>{row.consentConfirmed ? "Yes" : "No"}</Td>
+                    <Td>{row.bureauProvider ?? "-"}</Td>
+                    <Td>
+                      <StatusPill status={row.responseStatus} />
+                    </Td>
+                  </Tr>
+                ))}
+              </TBody>
+            </Table>
+
+            <div className="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={page.first}
+                onClick={() => setPageNumber((p) => Math.max(0, p - 1))}
+                icon={<ChevronIcon size={14} className="rotate-180" />}
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-neutral-500">
+                Page {page.number + 1} of {Math.max(page.totalPages, 1)} ({page.totalElements} total)
+              </span>
+              <Button variant="secondary" size="sm" disabled={page.last} onClick={() => setPageNumber((p) => p + 1)}>
+                Next
+                <ChevronIcon size={14} />
+              </Button>
+            </div>
+          </>
+        )}
+      </Card>
     </div>
   );
 }

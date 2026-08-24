@@ -1,6 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { AuthLayout } from "../components/layout/AuthLayout";
+import { Button } from "../components/common/Button";
+import { Input } from "../components/common/FormField";
+import { AlertIcon } from "../components/common/Icon";
 
 export function RegisterPage() {
   const { register } = useAuth();
@@ -26,35 +30,50 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="auth-page">
-      <h1>Create an account</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Username
-          <input value={username} onChange={(e) => setUsername(e.target.value)} required minLength={3} />
-        </label>
-        <label>
-          Email
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-          />
-        </label>
-        {error && <p className="form-error">{error}</p>}
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Creating account..." : "Register"}
-        </button>
+    <AuthLayout title="Create your account" description="Open a Meridian Bank account in under a minute.">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+        <Input
+          label="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          minLength={3}
+          autoComplete="username"
+        />
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          autoComplete="email"
+        />
+        <Input
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={8}
+          helperText="At least 8 characters."
+          autoComplete="new-password"
+        />
+        {error && (
+          <div className="flex items-start gap-2 rounded-lg bg-danger-50 px-3.5 py-2.5 text-sm text-danger-700">
+            <AlertIcon size={16} className="mt-0.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+        <Button type="submit" loading={submitting} fullWidth size="lg" className="mt-1">
+          Create account
+        </Button>
       </form>
-      <p>
-        Already have an account? <Link to="/login">Log in</Link>
+      <p className="mt-6 text-center text-sm text-neutral-500">
+        Already have an account?{" "}
+        <Link to="/login" className="font-medium text-primary-600 hover:text-primary-700">
+          Log in
+        </Link>
       </p>
-    </div>
+    </AuthLayout>
   );
 }

@@ -1,11 +1,23 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import * as loanApi from "../api/loanApi";
 import type { EmiScheduleResponse, LoanResponse } from "../types/loan";
+import { PageHeader } from "../components/common/PageHeader";
+import { Card } from "../components/common/Card";
+import { Button } from "../components/common/Button";
+import { Input } from "../components/common/FormField";
+import { StatusPill } from "../components/common/StatusPill";
+import { Money } from "../components/common/Money";
+import { EmptyState } from "../components/common/EmptyState";
+import { Table, THead, Th, TBody, Tr, Td } from "../components/common/Table";
+import { AlertIcon, InfoIcon } from "../components/common/Icon";
+import { useToast } from "../components/common/ToastContext";
 
 export function LoanDetailPage() {
   const { id } = useParams<{ id: string }>();
   const loanId = Number(id);
+  const navigate = useNavigate();
+  const toast = useToast();
 
   const [loan, setLoan] = useState<LoanResponse | null>(null);
   const [schedule, setSchedule] = useState<EmiScheduleResponse[]>([]);
@@ -44,97 +56,166 @@ export function LoanDetailPage() {
     setPaying(true);
     try {
       await loanApi.payEmi(loanId, nextUnpaid.installmentNumber, { amount: Number(payAmount) });
+      toast.success(`Installment #${nextUnpaid.installmentNumber} paid.`);
       loadLoan();
     } catch {
       setError("Could not process EMI payment. Check the linked account balance.");
+      toast.error("Could not process EMI payment.");
     } finally {
       setPaying(false);
     }
   }
 
   if (loading) {
-    return <p>Loading loan...</p>;
+    return (
+      <div>
+        <PageHeader title="Loan" />
+        <Card>
+          <div className="h-24 animate-pulse rounded-xl bg-neutral-100" />
+        </Card>
+      </div>
+    );
   }
 
   if (!loan) {
-    return <p>Loan not found.</p>;
+    return (
+      <EmptyState
+        icon={<AlertIcon size={22} />}
+        title="Loan not found"
+        description="This loan may not exist or you may not have access to it."
+        action={
+          <Button size="sm" onClick={() => navigate("/loans")}>
+            Back to loans
+          </Button>
+        }
+      />
+    );
   }
 
   return (
-    <div className="loan-detail-page">
-      <h1>Loan #{loan.id}</h1>
-      <p>
-        Type: <strong>{loan.loanType}</strong> &nbsp; Status:{" "}
-        <span className={`status-badge status-${loan.status.toLowerCase()}`}>{loan.status}</span>
-      </p>
-      <p>
-        Principal: {loan.principal.toFixed(2)} &nbsp; Rate: {loan.interestRateAnnual}% &nbsp; Tenure:{" "}
-        {loan.tenureMonths} months &nbsp; EMI: {loan.emiAmount.toFixed(2)}
-      </p>
-      {loan.disbursedDate && <p>Disbursed on {loan.disbursedDate}</p>}
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={`Loan #${loan.id}`}
+        description={
+          <span className="flex items-center gap-2">
+            {loan.loanType} loan
+            <StatusPill status={loan.status} />
+          </span>
+        }
+      />
 
-      {loan.status === "PENDING" && <p>Awaiting officer/admin approval before an EMI schedule is generated.</p>}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <Card>
+          <p className="text-xs font-medium text-neutral-500">Principal</p>
+          <Money amount={loan.principal} size="lg" className="mt-1 block" />
+        </Card>
+        <Card>
+          <p className="text-xs font-medium text-neutral-500">Interest rate</p>
+          <p className="tabular-nums mt-1 text-2xl font-bold text-neutral-900">{loan.interestRateAnnual}%</p>
+        </Card>
+        <Card>
+          <p className="text-xs font-medium text-neutral-500">Tenure</p>
+          <p className="tabular-nums mt-1 text-2xl font-bold text-neutral-900">{loan.tenureMonths} mo</p>
+        </Card>
+        <Card>
+          <p className="text-xs font-medium text-neutral-500">EMI</p>
+          <Money amount={loan.emiAmount} size="lg" className="mt-1 block" />
+        </Card>
+      </div>
+
+      {loan.disbursedDate && <p className="text-sm text-neutral-500">Disbursed on {loan.disbursedDate}</p>}
+
+      {loan.status === "PENDING" && (
+        <div className="flex items-start gap-2.5 rounded-xl border border-info-100 bg-info-50 px-4 py-3 text-sm text-info-700">
+          <InfoIcon size={17} className="mt-0.5 shrink-0" />
+          <span>Awaiting officer/admin approval before an EMI schedule is generated.</span>
+        </div>
+      )}
 
       {schedule.length > 0 && (
         <>
-          <h2>EMI Schedule</h2>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Due date</th>
-                <th>Principal</th>
-                <th>Interest</th>
-                <th>EMI</th>
-                <th>Paid</th>
-                <th>Status</th>
-                <th>Days overdue</th>
-              </tr>
-            </thead>
-            <tbody>
-              {schedule.map((installment) => (
-                <tr key={installment.id}>
-                  <td>{installment.installmentNumber}</td>
-                  <td>{installment.dueDate}</td>
-                  <td>{installment.principalComponent.toFixed(2)}</td>
-                  <td>{installment.interestComponent.toFixed(2)}</td>
-                  <td>{installment.emiAmount.toFixed(2)}</td>
-                  <td>{installment.paidAmount.toFixed(2)}</td>
-                  <td>
-                    <span className={`status-badge emi-status-${installment.status.toLowerCase()}`}>
-                      {installment.status}
-                    </span>
-                  </td>
-                  <td>{installment.daysOverdue > 0 ? installment.daysOverdue : "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
           {nextUnpaid && (
-            <>
-              <h2>Pay next installment (#{nextUnpaid.installmentNumber})</h2>
-              <form onSubmit={handlePay} className="inline-form">
-                <label>
-                  Amount
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    value={payAmount}
-                    onChange={(e) => setPayAmount(e.target.value)}
-                    required
-                  />
-                </label>
-                <button type="submit" disabled={paying}>
-                  {paying ? "Paying..." : "Pay EMI"}
-                </button>
+            <Card>
+              <h2 className="mb-4 text-base font-semibold text-neutral-900">
+                Pay next installment (#{nextUnpaid.installmentNumber})
+              </h2>
+              <form onSubmit={handlePay} className="flex flex-col items-end gap-4 sm:flex-row">
+                <Input
+                  label="Amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={payAmount}
+                  onChange={(e) => setPayAmount(e.target.value)}
+                  required
+                  wrapperClassName="w-full sm:w-56"
+                  startAdornment={<span className="text-sm">&#8377;</span>}
+                />
+                <Button type="submit" loading={paying}>
+                  Pay EMI
+                </Button>
               </form>
-            </>
+              {error && (
+                <div className="mt-4 flex items-start gap-2 rounded-lg bg-danger-50 px-3.5 py-2.5 text-sm text-danger-700">
+                  <AlertIcon size={16} className="mt-0.5 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+            </Card>
           )}
+
+          <div>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-500">EMI schedule</h2>
+            <Card padded={false}>
+              <Table>
+                <THead>
+                  <Th>#</Th>
+                  <Th>Due date</Th>
+                  <Th className="text-right">Principal</Th>
+                  <Th className="text-right">Interest</Th>
+                  <Th className="text-right">EMI</Th>
+                  <Th className="text-right">Paid</Th>
+                  <Th>Status</Th>
+                  <Th className="text-right">Days overdue</Th>
+                </THead>
+                <TBody>
+                  {schedule.map((installment) => (
+                    <Tr
+                      key={installment.id}
+                      className={nextUnpaid?.id === installment.id ? "bg-primary-50/40" : undefined}
+                    >
+                      <Td>{installment.installmentNumber}</Td>
+                      <Td>{installment.dueDate}</Td>
+                      <Td className="text-right">
+                        <Money amount={installment.principalComponent} size="sm" />
+                      </Td>
+                      <Td className="text-right">
+                        <Money amount={installment.interestComponent} size="sm" />
+                      </Td>
+                      <Td className="text-right">
+                        <Money amount={installment.emiAmount} size="sm" />
+                      </Td>
+                      <Td className="text-right">
+                        <Money amount={installment.paidAmount} size="sm" />
+                      </Td>
+                      <Td>
+                        <StatusPill status={installment.status} />
+                      </Td>
+                      <Td className="text-right">
+                        {installment.daysOverdue > 0 ? (
+                          <span className="font-medium text-warning-600">{installment.daysOverdue}</span>
+                        ) : (
+                          "-"
+                        )}
+                      </Td>
+                    </Tr>
+                  ))}
+                </TBody>
+              </Table>
+            </Card>
+          </div>
         </>
       )}
-      {error && <p className="form-error">{error}</p>}
     </div>
   );
 }

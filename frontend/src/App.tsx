@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import { RoleGuard } from "./auth/RoleGuard";
-import { NavBar } from "./components/layout/NavBar";
+import { AppShell } from "./components/layout/AppShell";
+import { ToastProvider } from "./components/common/ToastContext";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ProfilePage } from "./pages/ProfilePage";
@@ -14,6 +16,8 @@ import { LoansPage } from "./pages/LoansPage";
 import { LoanDetailPage } from "./pages/LoanDetailPage";
 import { CreditScorePage } from "./pages/CreditScorePage";
 import { AdminAuditPage } from "./pages/AdminAuditPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
+import type { Role } from "./types/auth";
 import "./App.css";
 
 function HomeRedirect() {
@@ -21,100 +25,105 @@ function HomeRedirect() {
   return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
 }
 
+/** Wraps a page in auth + the persistent sidebar app shell. */
+function Protected({ children, roles }: { children: ReactNode; roles?: Role[] }) {
+  const content = roles ? <RoleGuard allowedRoles={roles}>{children}</RoleGuard> : children;
+  return (
+    <ProtectedRoute>
+      <AppShell>{content}</AppShell>
+    </ProtectedRoute>
+  );
+}
+
 function AppRoutes() {
   return (
-    <>
-      <NavBar />
-      <main className="app-main">
-        <Routes>
-          <Route path="/" element={<HomeRedirect />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/accounts"
-            element={
-              <ProtectedRoute>
-                <AccountsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/accounts/:id"
-            element={
-              <ProtectedRoute>
-                <AccountDetailPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/accounts/:id/transactions"
-            element={
-              <ProtectedRoute>
-                <TransactionsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/loans"
-            element={
-              <ProtectedRoute>
-                <LoansPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/loans/:id"
-            element={
-              <ProtectedRoute>
-                <LoanDetailPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/credit-score"
-            element={
-              <ProtectedRoute>
-                <CreditScorePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/audit"
-            element={
-              <ProtectedRoute>
-                <RoleGuard allowedRoles={["ADMIN"]}>
-                  <AdminAuditPage />
-                </RoleGuard>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-    </>
+    <Routes>
+      <Route path="/" element={<HomeRedirect />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route
+        path="/dashboard"
+        element={
+          <Protected>
+            <DashboardPage />
+          </Protected>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <Protected>
+            <ProfilePage />
+          </Protected>
+        }
+      />
+      <Route
+        path="/accounts"
+        element={
+          <Protected>
+            <AccountsPage />
+          </Protected>
+        }
+      />
+      <Route
+        path="/accounts/:id"
+        element={
+          <Protected>
+            <AccountDetailPage />
+          </Protected>
+        }
+      />
+      <Route
+        path="/accounts/:id/transactions"
+        element={
+          <Protected>
+            <TransactionsPage />
+          </Protected>
+        }
+      />
+      <Route
+        path="/loans"
+        element={
+          <Protected>
+            <LoansPage />
+          </Protected>
+        }
+      />
+      <Route
+        path="/loans/:id"
+        element={
+          <Protected>
+            <LoanDetailPage />
+          </Protected>
+        }
+      />
+      <Route
+        path="/credit-score"
+        element={
+          <Protected>
+            <CreditScorePage />
+          </Protected>
+        }
+      />
+      <Route
+        path="/admin/audit"
+        element={
+          <Protected roles={["ADMIN"]}>
+            <AdminAuditPage />
+          </Protected>
+        }
+      />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 
 function App() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <ToastProvider>
+        <AppRoutes />
+      </ToastProvider>
     </AuthProvider>
   );
 }
